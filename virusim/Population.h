@@ -6,48 +6,40 @@
 //
 // Classe que representa uma população contaminável.
 //
-class Population
-{
-   public:
+class Population {
+  public:
+    Population(int s);
+    ~Population();
 
-      Population(int s);
-      ~Population();
+    struct PersonPosn {
+        int i;
+        int j;
+    };
+    struct PersonPosn centralPerson();
 
-      struct PersonPosn
-      { 
-            int i; 
-            int j;
-      };
-      struct PersonPosn centralPerson();
-      
-      
-      int propagateUntilOut(PersonPosn start_person, double prob_spread, Random& r);
-      double getPercentInfected();
+    int propagateUntilOut(PersonPosn start_person, double prob_spread, Random &r);
+    double getPercentInfected();
 
-   private:
+  private:
+    void reset();
+    void exposePerson(PersonPosn p);
+    void propagate(double prob_spread, Random &r);
 
-      void reset();
-      void exposePerson(PersonPosn p);
-      void propagate(double prob_spread, Random& r);     
+    bool isPropagating();
+    bool virusSpreads(double prob_spread, Random &r);
 
-      bool isPropagating();
-      bool virusSpreads(double prob_spread, Random& r);
+  private:
+    // A população é armazenada em uma matriz.
+    // Cada elemento é um indivíduo que pode estar em 4 estados.
 
-   private:
+    enum Person {
+        Uninfected, // pessoa não infectada
+        Exposed,    // pessoa exposta
+        Infected    // pessoa infectada
+    };
 
-      // A população é armazenada em uma matriz.
-      // Cada elemento é um indivíduo que pode estar em 4 estados.
-
-      enum Person {
-         Uninfected,    // pessoa não infectada
-         Exposed,       // pessoa exposta
-         Infected       // pessoa infectada
-      };        
-
-      Person** pop; 
-      int size;
-
+    Person **pop;
+    int size;
 };
 
 #endif
-
