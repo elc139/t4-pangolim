@@ -2,7 +2,7 @@ CXX       = clang++
 CXXFLAGS  = -Wall -I.
 LDFLAGS   = -fopenmp
 PROGRAM   = omp_virus
-SRCS      = omp_virus.cpp Random.cpp
+SRCS      = omp_virus.cpp Random.cpp Population.cpp
 OBJS      = $(SRCS:.cpp=.o)
 
 .SUFFIXES: .cpp .o
