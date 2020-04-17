@@ -1,0 +1,4 @@
+*.o
+.vscode
+omp_virus/omp_virus
+virusim/virusim
