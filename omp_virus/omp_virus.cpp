@@ -4,7 +4,7 @@
 #include <omp.h>
 
 void checkCommandLine(int argc, char **argv, int &size, int &trials,
-                      int &probs) {
+                      int &probs, int &threads) {
     if (argc > 1) {
         size = atoi(argv[1]);
     }
@@ -14,6 +14,9 @@ void checkCommandLine(int argc, char **argv, int &size, int &trials,
     if (argc > 3) {
         probs = atoi(argv[3]);
     }
+    if (argc > 4) {
+        threads = atoi(argv[4]);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -21,6 +24,7 @@ int main(int argc, char *argv[]) {
     int population_size = 30;
     int n_trials = 5000;
     int n_probs = 101;
+    int n_threads = 1;
 
     double *percent_infected; // percentuais de infectados (saída)
     double *prob_spread;      // probabilidades a serem testadas (entrada)
@@ -29,7 +33,8 @@ int main(int argc, char *argv[]) {
     double prob_step;
     int base_seed = 100;
 
-    checkCommandLine(argc, argv, population_size, n_trials, n_probs);
+    checkCommandLine(argc, argv, population_size, n_trials, n_probs, n_threads);
+    omp_set_num_threads(n_threads);
     try {
         Population *population = new Population(population_size);
         Random rand;
@@ -38,7 +43,6 @@ int main(int argc, char *argv[]) {
         percent_infected = new double[n_probs];
 
         prob_step = (prob_max - prob_min) / (double)(n_probs - 1);
-
         std::cout << "Probabilidade, Percentual Infectado" << std::endl;
         for (int ip = 0; ip < n_probs; ip++) {
             prob_spread[ip] = prob_min + (double)ip * prob_step;
