@@ -49,7 +49,7 @@ double Population::getPercentInfected() {
     int sum = 0;
 
 // calcula quantidade de pessoas infectadas
-#pragma omp parallel for reduction(+ : sum) shared(pop) schedule(static) collapse(2)
+#pragma omp parallel for reduction(+ : sum) shared(pop) schedule(static)
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             if (pop[i][j] == Infected) {
@@ -63,8 +63,8 @@ double Population::getPercentInfected() {
 // TODO: Paralelizar
 void Population::propagate(double prob_spread, Random &r) {
 
-    // pessoas expostas são infectadas pelo vírus
-    #pragma omp parallel for shared(pop) schedule(static)
+// pessoas expostas são infectadas pelo vírus
+#pragma omp parallel for shared(pop) schedule(static)
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             if (pop[i][j] == Exposed)
@@ -72,15 +72,16 @@ void Population::propagate(double prob_spread, Random &r) {
         }
     }
     hasExposed = false;
-    // pessoas não infectadas são expostas ao vírus quando se aproximam de uma
-    // infectada
-    #pragma omp parallel for shared(pop, hasExposed) schedule(guided)
+// pessoas não infectadas são expostas ao vírus quando se aproximam de uma
+// infectada
+#pragma omp parallel for shared(pop, hasExposed) schedule(guided)
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             if (pop[i][j] == Infected) {
                 if (i != 0) { // pessoa ao norte
                     if (pop[i - 1][j] == Uninfected &&
                         virusSpreads(prob_spread, r)) {
+#pragma omp critical
                         pop[i - 1][j] = Exposed;
                         hasExposed = true;
                     }
@@ -88,6 +89,7 @@ void Population::propagate(double prob_spread, Random &r) {
                 if (i != size - 1) { // pessoa ao sul
                     if (pop[i + 1][j] == Uninfected &&
                         virusSpreads(prob_spread, r)) {
+#pragma omp critical
                         pop[i + 1][j] = Exposed;
                         hasExposed = true;
                     }
@@ -95,6 +97,7 @@ void Population::propagate(double prob_spread, Random &r) {
                 if (j != 0) { // pessoa a oeste
                     if (pop[i][j - 1] == Uninfected &&
                         virusSpreads(prob_spread, r)) {
+#pragma omp critical
                         pop[i][j - 1] = Exposed;
                         hasExposed = true;
                     }
@@ -102,6 +105,7 @@ void Population::propagate(double prob_spread, Random &r) {
                 if (j != size - 1) { // pessoa a leste
                     if (pop[i][j + 1] == Uninfected &&
                         virusSpreads(prob_spread, r)) {
+#pragma omp critical
                         pop[i][j + 1] = Exposed;
                         hasExposed = true;
                     }
