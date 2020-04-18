@@ -3,8 +3,8 @@
 #include "Population.h"
 #include <omp.h>
 
-void checkCommandLine(int argc, char **argv, int &size, int &trials,
-                      int &probs, int &threads) {
+void checkCommandLine(int argc, char **argv, int &size, int &trials, int &probs,
+                      int &threads) {
     if (argc > 1) {
         size = atoi(argv[1]);
     }
@@ -51,7 +51,8 @@ int main(int argc, char *argv[]) {
             // executa vários experimentos para esta probabilidade
             for (int it = 0; it < n_trials; it++) {
                 // queima floresta até o fogo apagar
-                population->propagateUntilOut(population->centralPerson(), prob_spread[ip], rand);
+                population->propagateUntilOut(population->centralPerson(),
+                                              prob_spread[ip], rand);
                 percent_infected[ip] += population->getPercentInfected();
             }
 
@@ -59,7 +60,8 @@ int main(int argc, char *argv[]) {
             percent_infected[ip] /= n_trials;
 
             // mostra resultado para esta probabilidade
-            std::cout << prob_spread[ip] << ", " << percent_infected[ip] << std::endl;
+            std::cout << std::fixed << prob_spread[ip] << ", "
+                      << percent_infected[ip] << std::endl;
         }
 
         delete[] prob_spread;
