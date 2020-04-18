@@ -1,3 +1,7 @@
+//
+// Simulação de propagação de vírus.
+//
+// Uso: omp_virus <tamanho-da-populacao> <nro. experimentos> <probab. maxima> <nro. threads>
 #include <iostream>
 #include "Random.h"
 #include "Population.h"
@@ -50,13 +54,13 @@ int main(int argc, char *argv[]) {
             rand.setSeed(base_seed + ip);
             // executa vários experimentos para esta probabilidade
             for (int it = 0; it < n_trials; it++) {
-                // queima floresta até o fogo apagar
+                // Espalha enquanto tiverem pessoas expostas
                 population->propagateUntilOut(population->centralPerson(),
                                               prob_spread[ip], rand);
                 percent_infected[ip] += population->getPercentInfected();
             }
 
-            // calcula média dos percentuais de árvores queimadas
+            // calcula média dos percentuais de pessoas infectadas
             percent_infected[ip] /= n_trials;
 
             // mostra resultado para esta probabilidade

@@ -34,7 +34,7 @@ int Population::propagateUntilOut(PersonPosn sp, double prob_spread,
     pop[sp.i][sp.j] = Exposed;
     hasExposed = true;
 
-    // queima a floresta até terminar o fogo
+    // Espalha enquanto tiverem pessoas expostas
     count = 0;
     while (hasExposed) {
         propagate(prob_spread, r);
@@ -48,7 +48,7 @@ double Population::getPercentInfected() {
     int total = size * size - 1;
     int sum = 0;
 
-// calcula quantidade de pessoas infectadas
+// Calcula quantidade de pessoas infectadas
 #pragma omp parallel for reduction(+ : sum) shared(pop) schedule(static)
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
@@ -63,7 +63,7 @@ double Population::getPercentInfected() {
 // TODO: Paralelizar
 void Population::propagate(double prob_spread, Random &r) {
 
-// pessoas expostas são infectadas pelo vírus
+// Pessoas expostas são infectadas pelo vírus
 #pragma omp parallel for shared(pop) schedule(static)
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
@@ -72,7 +72,7 @@ void Population::propagate(double prob_spread, Random &r) {
         }
     }
     hasExposed = false;
-// pessoas não infectadas são expostas ao vírus quando se aproximam de uma
+// Pessoas não infectadas são expostas ao vírus quando se aproximam de uma
 // infectada
 #pragma omp parallel for shared(pop, hasExposed) schedule(guided)
     for (int i = 0; i < size; i++) {

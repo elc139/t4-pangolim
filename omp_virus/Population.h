@@ -31,7 +31,6 @@ class Population {
 
     void reset();
     void propagate(double prob_spread, Random &r);
-
     bool virusSpreads(double prob_spread, Random &r);
 
   public:
