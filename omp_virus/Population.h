@@ -1,7 +1,6 @@
 #ifndef __POPULATION_H
 #define __POPULATION_H
 
-#include <vector>
 #include "Random.h"
 //
 // Representação de um indivíduo.
@@ -26,14 +25,13 @@ class Population {
   private:
     // A população é armazenada em uma matriz.
     // Cada elemento é um indivíduo.
-    std::vector<std::vector<Person>> pop;
+    Person **pop;
     int size;
+    bool hasExposed;
 
     void reset();
-    void exposePerson(PersonPosn p);
     void propagate(double prob_spread, Random &r);
 
-    bool isPropagating();
     bool virusSpreads(double prob_spread, Random &r);
 
   public:
@@ -41,8 +39,7 @@ class Population {
     ~Population();
 
     PersonPosn centralPerson();
-    int propagateUntilOut(PersonPosn start_person, double prob_spread,
-                          Random &r);
+    int propagateUntilOut(PersonPosn sp, double prob_spread, Random &r);
     // Retorna percentual de pessoas infectadas
     double getPercentInfected();
 };
