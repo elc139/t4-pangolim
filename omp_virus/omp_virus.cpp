@@ -1,14 +1,19 @@
 //
 // Simulação de propagação de vírus.
 //
-// Uso: omp_virus <tamanho-da-populacao> <nro. experimentos> <probab. maxima> <nro. threads>
+// Uso: omp_virus <tamanho-da-populacao> <nro. experimentos> <probab. maxima>
+// <nro. threads>
 #include <iostream>
 #include "Random.h"
 #include "Population.h"
 #include <omp.h>
 
-void checkCommandLine(int argc, char **argv, int &size, int &trials, int &probs,
+#include <cstdlib>
+#include <string>
+
+bool checkCommandLine(int argc, char **argv, int &size, int &trials, int &probs,
                       int &threads) {
+    bool ambiente = true;
     if (argc > 1) {
         size = atoi(argv[1]);
     }
@@ -20,7 +25,9 @@ void checkCommandLine(int argc, char **argv, int &size, int &trials, int &probs,
     }
     if (argc > 4) {
         threads = atoi(argv[4]);
+        ambiente = false;
     }
+    return ambiente;
 }
 
 int main(int argc, char *argv[]) {
@@ -37,35 +44,57 @@ int main(int argc, char *argv[]) {
     double prob_step;
     int base_seed = 100;
 
-    checkCommandLine(argc, argv, population_size, n_trials, n_probs, n_threads);
-    omp_set_num_threads(n_threads);
+    bool env = checkCommandLine(argc, argv, population_size, n_trials, n_probs,
+                                n_threads);
     try {
-        Population *population = new Population(population_size);
+        // CÓDIGO COMPARTILHADO
         Random rand;
-
         prob_spread = new double[n_probs];
         percent_infected = new double[n_probs];
-
         prob_step = (prob_max - prob_min) / (double)(n_probs - 1);
         std::cout << "Probabilidade, Percentual Infectado" << std::endl;
-        for (int ip = 0; ip < n_probs; ip++) {
-            prob_spread[ip] = prob_min + (double)ip * prob_step;
-            percent_infected[ip] = 0.0;
-            rand.setSeed(base_seed + ip);
-            // executa vários experimentos para esta probabilidade
-            for (int it = 0; it < n_trials; it++) {
-                // Espalha enquanto tiverem pessoas expostas
-                population->propagateUntilOut(population->centralPerson(),
-                                              prob_spread[ip], rand);
-                percent_infected[ip] += population->getPercentInfected();
+
+        if (!env) { // EXECUÇÃO SETANDO THREADS POR PARAMETRO
+            omp_set_num_threads(n_threads);
+            Population *population = new Population(population_size);
+            for (int ip = 0; ip < n_probs; ip++) {      
+                prob_spread[ip] = prob_min + (double)ip * prob_step;
+                percent_infected[ip] = 0.0;
+                rand.setSeed(base_seed + ip);
+                for (int it = 0; it < n_trials; it++) {
+                    population->propagateUntilOut(population->centralPerson(),
+                                                  prob_spread[ip], rand);
+                    percent_infected[ip] += population->getPercentInfected();
+                }
+                percent_infected[ip] /= n_trials;
+                std::cout << std::fixed << prob_spread[ip] << ", "
+                          << percent_infected[ip] << std::endl;
             }
+        } else { // EXECUÇÃO USANDO THREADS DO ENV
+            const char *env_th = std::getenv("OMP_NUM_THREADS");
+            n_threads = std::stoi(env_th); // Pega as Threads do primeiro nível
+            Population **population = new Population *[n_threads];
+            for (int i = 0; i < n_threads; i++)
+                population[i] = new Population(population_size);
 
-            // calcula média dos percentuais de pessoas infectadas
-            percent_infected[ip] /= n_trials;
-
-            // mostra resultado para esta probabilidade
-            std::cout << std::fixed << prob_spread[ip] << ", "
-                      << percent_infected[ip] << std::endl;
+            omp_set_max_active_levels(2);
+            omp_set_nested(true);
+            for (int ip = 0; ip < n_probs; ip++) {
+                prob_spread[ip] = prob_min + (double)ip * prob_step;
+                percent_infected[ip] = 0.0;
+                rand.setSeed(base_seed + ip);
+#pragma omp parallel for schedule(dynamic) reduction(+ : percent_infected[ip])
+                for (int it = 0; it < n_trials; it++) {
+                    int id = omp_get_thread_num();
+                    population[id]->propagateUntilOut(
+                        population[id]->centralPerson(), prob_spread[ip], rand);
+                    percent_infected[ip] +=
+                        population[id]->getPercentInfected();
+                }
+                percent_infected[ip] /= n_trials;
+                std::cout << std::fixed << prob_spread[ip] << ", "
+                          << percent_infected[ip] << std::endl;
+            }
         }
 
         delete[] prob_spread;

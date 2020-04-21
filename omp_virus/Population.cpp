@@ -3,12 +3,14 @@
 Population::Population(int size) {
     this->size = size;
     pop = new Person *[size];
+    #pragma omp parallel for shared(pop)
     for (int i = 0; i < size; i++)
         pop[i] = new Person[size];
     reset();
 }
 
 Population::~Population() {
+    #pragma omp parallel for shared(pop)
     for (int i = 0; i < size; i++)
         delete[] pop[i];
     delete[] pop;
