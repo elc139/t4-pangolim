@@ -1,11 +1,5 @@
-[Máquina 1]
-Processador: Intel(R) Core(TM) i5-8265U CPU @ 1.60GHz, 4 Núcleos, 8 Threads
-Memória: 8 GiB SODIMM DDR4 Síncrono 2400 MHz 
-OS: Ubuntu 18.04.4 LTS
+Processador: Intel Core i7-4500U 1.8 GHz
+Memória RAM: 8 GB
+GPU: Nvidia GT 740M
+Sistema Operacional: Linux Mint 19.3
 Compilador: Clang/LLVM v. 6.0.0
-
-[Máquina 2]
-Processador:
-Memória:
-OS:
-Compilador:
